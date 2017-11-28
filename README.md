@@ -1,5 +1,4 @@
-1. Импорт библиотек 
-
+1. Import libraries
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -10,37 +9,37 @@ import pylab
 plt.rcParams['figure.figsize'] = 10, 10
 %matplotlib inline
 
-2. Указание файлов для тренировки
+2. Track the train file
 
 train = pd.read_json("train.json")
 
-Вывод пяти первых строчек файла
+Output the 5 first lines
 
 train.head(5)
 
-3. Перевод из json в массив:
+3.From json to numpy:
 
 X_band_1=np.array([np.array(band).astype(np.float32).reshape(75, 75) for band in train["band_1"]])
 
-Проверим размерность:
+Check the dimension:
 
 X_band_1.shape
 
 X_band_2=np.array([np.array(band).astype(np.float32).reshape(75, 75) for band in train["band_2"]])
 
 
-Добавляем еще одну ось:
+add one more axis:
 X_train = np.concatenate([X_band_1[:, :, :, np.newaxis], X_band_2[:, :, :, np.newaxis],((X_band_1+X_band_2)/2)[:, :, :, np.newaxis]], 
                          axis=-1)
 
-Выводим новую размерность:
+Check new  dimension:
 X_train.shape
 
-Строчки с ошибками:
+Lines with erroes:
 [X_band_1[:, :, :, np.newaxis]].shape
 (X_band_1+X_band_2)/2)[:, :, :, np.newaxis].shape
 
-4. Визуализируем данные с помощью plotpy и выведем 1 из рисунков ( корабль или айсберг)
+4. visualization with plotpy and output the one figure ( iceberg or ship)
 
 import plotly.offline as py
 import plotly.graph_objs as go
