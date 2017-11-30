@@ -49,15 +49,17 @@ def plotmy3d(c, name):
 plotmy3d(X_band_1[844,:,:], 'iceberg')
 
 
-import keras 
+iimport keras 
 from matplotlib import pyplot
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Dense, Dropout
+from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout, Activation
 from keras.layers import GlobalMaxPooling2D
 from keras.models import Model
-
+from keras.optimizers import Adam
+from keras.callbacks import ModelCheckpoint, Callback, EarlyStopping
 def getModel():
+    #Building the model
     gmodel=Sequential()
     #Conv Layer 1
     gmodel.add(Conv2D(64, kernel_size=(3, 3),activation='relu', input_shape=(75, 75, 3)))
@@ -68,7 +70,8 @@ def getModel():
     gmodel.add(Conv2D(128, kernel_size=(3, 3), activation='relu' ))
     gmodel.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
     gmodel.add(Dropout(0.2))
-     #Conv Layer 3
+
+    #Conv Layer 3
     gmodel.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
     gmodel.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
     gmodel.add(Dropout(0.2))
@@ -77,12 +80,11 @@ def getModel():
     gmodel.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
     gmodel.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
     gmodel.add(Dropout(0.2))
-    
-    #Sosdaem 1D vektor
+
+    #Flatten the data for upcoming dense layers
     gmodel.add(Flatten())
-    
-    from keras.optimizers import Adam
-     #Dense Layers
+
+    #Dense Layers
     gmodel.add(Dense(512))
     gmodel.add(Activation('relu'))
     gmodel.add(Dropout(0.2))
@@ -102,3 +104,27 @@ def getModel():
                   metrics=['accuracy'])
     gmodel.summary()
     return gmodel
+
+
+def get_callbacks(filepath, patience=2):
+    es = EarlyStopping('val_loss', patience=patience, mode="min")
+    msave = ModelCheckpoint(filepath, save_best_only=True)
+    return [es, msave]
+file_path = ".model_weights.hdf5"
+callbacks = get_callbacks(filepath=file_path, patience=5)
+
+target_train = train['is_iceberg']
+
+from sklearn.model_selection import ShuffleSplit
+from sklearn.model_selection import cross_val_score
+from keras.wrappers.scikit_learn import KerasClassifier
+
+shuffle_split = ShuffleSplit(test_size=.2, train_size=.8, n_splits=1)
+
+model = KerasClassifier(build_fn=getModel, epochs=10, batch_size=10, verbose=0)
+scores = cross_val_score(model, X_train, target_train, cv=shuffle_split)
+
+print("«начени€ правильности перекрестной проверки:\n{}".format(scores))
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
+    
