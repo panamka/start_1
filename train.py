@@ -104,8 +104,6 @@ def getModel():
                   metrics=['accuracy'])
     gmodel.summary()
     return gmodel
-
-
 def get_callbacks(filepath, patience=2):
     es = EarlyStopping('val_loss', patience=patience, mode="min")
     msave = ModelCheckpoint(filepath, save_best_only=True)
@@ -118,13 +116,15 @@ target_train = train['is_iceberg']
 from sklearn.model_selection import ShuffleSplit
 from sklearn.model_selection import cross_val_score
 from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.model_selection import StratifiedKFold
+import numpy
 
-shuffle_split = ShuffleSplit(test_size=.2, train_size=.8, n_splits=1)
-
-model = KerasClassifier(build_fn=getModel, epochs=10, batch_size=10, verbose=0)
-scores = cross_val_score(model, X_train, target_train, cv=shuffle_split)
+seed = 7
+numpy.random.seed(seed)
+kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
+model = KerasClassifier(build_fn=getModel, epochs=10, batch_size=10, verbose=1)
+scores = cross_val_score(model, X_train, target_train, cv=kfold)
 
 print("«начени€ правильности перекрестной проверки:\n{}".format(scores))
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
-    
+#print('Test loss:', score[0])
+#print('Test accuracy:', score[1])
