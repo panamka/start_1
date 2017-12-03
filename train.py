@@ -119,7 +119,7 @@ from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import StratifiedKFold
 import numpy
 
-seed = 7
+'''seed = 7
 numpy.random.seed(seed)
 kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
 model = KerasClassifier(build_fn=getModel, epochs=10, batch_size=10, verbose=1)
@@ -128,3 +128,31 @@ scores = cross_val_score(model, X_train, target_train, cv=kfold)
 print("«начени€ правильности перекрестной проверки:\n{}".format(scores))
 #print('Test loss:', score[0])
 #print('Test accuracy:', score[1])
+
+'''
+mask = (train.inc_angle != 'na').values
+mask
+angle = train.inc_angle.values[mask]
+angle
+unique_angle = np.unique(angle)
+sort_angle = np.sort(unique_angle)
+sort_angle
+plt.plot(sort_angle)
+x = sort_angle.astype(float)
+bins = [24.0, 34.0, 43.0, 53.0]
+np.digitize(x, bins)
+
+
+x = angle.astype(float)
+bins = [24.0, 34.0, 43.0, 53.0]
+groups = np.digitize(x, bins)
+
+
+X_without_na = X_train[mask,:,:,:]
+Y_without_na = target_train.values[mask]
+
+gss = GroupShuffleSplit(n_splits=4, random_state=0)
+for train, test in gss.split(X_without_na, Y_without_na, groups=groups):
+     print("%s %s" % (train, test))
+
+Y_without_na[train]
